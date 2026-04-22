@@ -1,22 +1,21 @@
 name: GH-Actions
 on:
-  push:
-    branches:
-      - "**"
-    tags:
-      - "v*"
-  pull_request:
-    branches:
-      - "**"
-
+    push:
+        branches:
+            - "**"
+        tags:
+            - "v*"
+    pull_request:
+        branches:
+            - "**"
 jobs:
-  placeholder:
-    name: placeholder
-    runs-on: cronos
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: No-op
-        run: |
-          echo "Monorepo CI placeholder - per-service CI coming once Lunar monorepo CI support lands."
-          exit 0
+    placeholder:
+        name: placeholder
+        runs-on: localdev-e2e-test-1776851018-main
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            - name: No-op
+              run: |
+                echo "Monorepo CI placeholder - per-service CI coming once Lunar monorepo CI support lands."
+                exit 0
