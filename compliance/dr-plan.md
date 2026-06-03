@@ -56,3 +56,5 @@ This plan covers all production services running on the `cronos` infrastructure.
 ## Review Cadence
 
 This plan is reviewed quarterly. The last review was conducted on 2026-02-10 by `brandon@pantalasa.org`.
+
+<!-- QA S4 probe — compliance-only change (2026-06-03) -->
