@@ -40,3 +40,5 @@ func main() {
 }
 
 // QA monorepo path-filter probe S1 — touches services/backend-go only (2026-06-03)
+
+// QA S2 probe — backend-go leg of multi-component PR

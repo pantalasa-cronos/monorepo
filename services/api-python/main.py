@@ -26,3 +26,5 @@ if __name__ == "__main__":
     addr = os.environ.get("ADDR", "0.0.0.0")
     port = int(os.environ.get("PORT", "8081"))
     app.run(host=addr, port=port)
+
+# QA S2 probe — api-python leg of multi-component PR
