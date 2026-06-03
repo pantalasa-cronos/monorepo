@@ -38,5 +38,3 @@ func main() {
 		log.Fatalf("listen: %v", err)
 	}
 }
-
-// QA monorepo path-filter probe S1 — touches services/backend-go only (2026-06-03)
