@@ -9,14 +9,73 @@ on:
     branches:
       - "**"
 
+# Per-service CI jobs for the monorepo. Each job pins its CI-collected facts to
+# the matching subdir component via LUNAR_COMPONENT (repo-relative path). The
+# lunar-ci-agent on the `cronos` runner traces each job's tool invocations and
+# attributes them to the named component:
+#
+#   LUNAR_COMPONENT=services/backend-go
+#     -> github.com/pantalasa-cronos/monorepo/services/backend-go
+#   LUNAR_COMPONENT=services/api-python
+#     -> github.com/pantalasa-cronos/monorepo/services/api-python
+#
+# Without LUNAR_COMPONENT the agent falls back to single-component (whole-repo)
+# attribution, which can't tell the sub-components apart. The env var is the
+# explicit, deterministic input (vs. ciPipelines workflow-name matching or
+# LUNAR_COMPONENT_INFER cwd inference).
+
 jobs:
-  placeholder:
-    name: placeholder
+  backend-go:
+    name: backend-go
     runs-on: cronos
+    env:
+      LUNAR_COMPONENT: services/backend-go
+    defaults:
+      run:
+        working-directory: services/backend-go
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: No-op
+        with:
+          clean: true
+      - name: Go build
         run: |
-          echo "Monorepo CI placeholder - per-service CI coming once Lunar monorepo CI support lands."
-          exit 0
+          go version
+          go mod download
+          go build ./...
+      - name: Go vet
+        run: go vet ./...
+      - name: Go test
+        run: go test ./... -coverprofile=/tmp/backend-go-coverage.out
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.62.0
+          golangci-lint version
+      - name: Run golangci-lint
+        run: golangci-lint run --out-format=json:golangci-lint.json,line-number --timeout=5m || true
+
+  api-python:
+    name: api-python
+    runs-on: cronos
+    env:
+      LUNAR_COMPONENT: services/api-python
+    defaults:
+      run:
+        working-directory: services/api-python
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: Python version
+        run: python3 --version
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Compile check
+        run: |
+          . .venv/bin/activate
+          python -m py_compile main.py
