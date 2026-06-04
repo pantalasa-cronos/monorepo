@@ -1,5 +1,8 @@
 """Tiny Flask service for the pantalasa-cronos monorepo api-python component."""
 
+# Touches api-python so the path-filtered code collector fires for this
+# sub-component alongside the per-service CI job (LUNAR_COMPONENT attribution test).
+
 import os
 
 from flask import Flask, jsonify

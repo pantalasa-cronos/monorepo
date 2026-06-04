@@ -1,5 +1,8 @@
 package main
 
+// Touches backend-go so the path-filtered code collector fires for this
+// sub-component alongside the per-service CI job (LUNAR_COMPONENT attribution test).
+
 import (
 	"encoding/json"
 	"log"
