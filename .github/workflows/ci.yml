@@ -81,3 +81,27 @@ jobs:
         run: |
           . .venv/bin/activate
           python -m py_compile main.py
+
+  # Comma-separated LUNAR_COMPONENT (multi-explicit): one shared job's CI is
+  # attributed to BOTH named components at once. backend-go + compliance are
+  # named here (api-python intentionally NOT, so its INFER cwd attribution
+  # stays cleanly isolated on a workflow-only diff).
+  cross-service:
+    name: cross-service
+    runs-on: cronos
+    env:
+      LUNAR_COMPONENT: "services/backend-go,compliance"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: Install semgrep
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install --quiet semgrep
+      - name: Semgrep scan (shared)
+        run: |
+          . .venv/bin/activate
+          semgrep scan --config auto . || true
