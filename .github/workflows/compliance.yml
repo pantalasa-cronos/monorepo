@@ -27,6 +27,13 @@ jobs:
         with:
           clean: true
       - name: Install semgrep
-        run: pip install --quiet semgrep
+        # System Python is externally-managed (PEP 668); use a venv like the
+        # api-python job does.
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install --quiet semgrep
       - name: Semgrep scan
-        run: semgrep scan --config auto . || true
+        run: |
+          . .venv/bin/activate
+          semgrep scan --config auto . || true
