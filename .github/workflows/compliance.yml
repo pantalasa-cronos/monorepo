@@ -1,0 +1,32 @@
+name: compliance-ci
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+# ciPipelines method: this workflow's NAME (compliance-ci) matches
+# `ciPipelines: ["compliance-ci"]` declared on the
+# github.com/pantalasa-cronos/monorepo/compliance component in
+# pantalasa-cronos/lunar/lunar-config.yml. No LUNAR_COMPONENT and no
+# LUNAR_COMPONENT_INFER here — the agent attributes the traced semgrep run to
+# the compliance component purely via the workflow-name -> ciPipelines match.
+# (compliance/ is docs/markdown, so it has no go/python build; semgrep.cli is a
+# domain:engineering ci-after-command collector that applies to this component
+# and gives us a real ci collection to attribute.)
+jobs:
+  compliance:
+    name: compliance
+    runs-on: cronos
+    defaults:
+      run:
+        working-directory: compliance
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: Install semgrep
+        run: pip install --quiet semgrep
+      - name: Semgrep scan
+        run: semgrep scan --config auto . || true

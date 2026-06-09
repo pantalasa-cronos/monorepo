@@ -3,6 +3,8 @@
 # Touches api-python so the path-filtered code collector fires for this
 # sub-component alongside the per-service CI job (LUNAR_COMPONENT attribution test).
 # Re-run after reverting the snyk TEMP pin that wedged the cronos hub manifest.
+# ci-probe 2026-06-08: switched to LUNAR_COMPONENT_INFER — this touch makes
+# api-python appear in the PR diff so changed-paths inference is exercised too.
 
 import os
 
