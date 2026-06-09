@@ -3,7 +3,6 @@ package main
 // Touches backend-go so the path-filtered code collector fires for this
 // sub-component alongside the per-service CI job (LUNAR_COMPONENT attribution test).
 // Re-run after reverting the snyk TEMP pin that wedged the cronos hub manifest.
-// ci-probe 2026-06-08: confirm real ci collection flows end-to-end (per-component attribution).
 
 import (
 	"encoding/json"
