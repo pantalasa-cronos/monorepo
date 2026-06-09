@@ -57,8 +57,10 @@ jobs:
   api-python:
     name: api-python
     runs-on: cronos
+    # INFER method: no LUNAR_COMPONENT — agent infers services/api-python
+    # from the traced process cwd (working-directory below) + component paths.
     env:
-      LUNAR_COMPONENT: services/api-python
+      LUNAR_COMPONENT_INFER: "true"
     defaults:
       run:
         working-directory: services/api-python
