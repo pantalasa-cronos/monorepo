@@ -9,24 +9,29 @@ on:
     branches:
       - "**"
 
-# Per-service CI jobs for the monorepo. Each job pins its CI-collected facts to
-# the matching subdir component via LUNAR_COMPONENT (repo-relative path). The
-# lunar-ci-agent on the `cronos` runner traces each job's tool invocations and
-# attributes them to the named component:
+# Monorepo attribution QA matrix. Each job exercises one CI -> component
+# attribution method in ci/observe.go:selectComponents and emits a unique
+# `lunar-qa::<method>` marker command. The lunar-ci-agent traces it, ci-meta
+# records it under the resolved component's `.ci.commands.*`, and the
+# qa-attribution policy (pantalasa-cronos/lunar) asserts each component carries
+# exactly its expected markers and none of its siblings'.
 #
-#   LUNAR_COMPONENT=services/backend-go
-#     -> github.com/pantalasa-cronos/monorepo/services/backend-go
-#   LUNAR_COMPONENT=services/api-python
-#     -> github.com/pantalasa-cronos/monorepo/services/api-python
+# The five methods (ciPipelines lives in compliance.yml):
+#   1 explicit single      -> LUNAR_COMPONENT=<path>
+#   2 explicit comma-multi  -> LUNAR_COMPONENT="<a>,<b>"
+#   3 ciPipelines           -> compliance.yml (workflow name match)
+#   4 INFER changed-paths   -> INFER=true at repo root; resolves to the subdir
+#                              the commit TOUCHED (changed-paths is tried first)
+#   5 INFER cwd             -> INFER=true + working-directory; resolves via cwd
+#                              only when changed-paths is empty
 #
-# Without LUNAR_COMPONENT the agent falls back to single-component (whole-repo)
-# attribution, which can't tell the sub-components apart. The env var is the
-# explicit, deterministic input (vs. ciPipelines workflow-name matching or
-# LUNAR_COMPONENT_INFER cwd inference).
+# Because changed-paths is global and tried before cwd, #4 and #5 need opposite
+# commit conditions -- see QA-attribution.md for the two-probe protocol.
 
 jobs:
-  backend-go:
-    name: backend-go
+  # Method 1: explicit single component.
+  explicit-single:
+    name: explicit-single
     runs-on: cronos
     env:
       LUNAR_COMPONENT: services/backend-go
@@ -38,27 +43,58 @@ jobs:
         uses: actions/checkout@v4
         with:
           clean: true
+      - name: QA marker
+        run: echo "lunar-qa::explicit-single"
       - name: Go build
         run: |
           go version
           go mod download
           go build ./...
-      - name: Go vet
-        run: go vet ./...
-      - name: Go test
-        run: go test ./... -coverprofile=/tmp/backend-go-coverage.out
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.62.0
-          golangci-lint version
-      - name: Run golangci-lint
-        run: golangci-lint run --out-format=json:golangci-lint.json,line-number --timeout=5m || true
 
-  api-python:
-    name: api-python
+  # Method 2: explicit, comma-separated (multi). One job's CI is attributed to
+  # BOTH named components at once (api-python intentionally excluded).
+  explicit-multi:
+    name: explicit-multi
     runs-on: cronos
-    # INFER method: no LUNAR_COMPONENT — agent infers services/api-python
-    # from the traced process cwd (working-directory below) + component paths.
+    env:
+      LUNAR_COMPONENT: "services/backend-go,compliance"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: QA marker
+        run: echo "lunar-qa::explicit-multi"
+      - name: Semgrep scan (shared)
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install --quiet semgrep
+          semgrep scan --config auto . || true
+
+  # Method 4: INFER via changed paths. Runs at the repo ROOT so cwd inference
+  # cannot resolve (rel == "."); attribution comes purely from the PR/commit's
+  # changed files intersecting a component's paths. Exercised by a commit that
+  # TOUCHES a subdir (probe A).
+  infer-changed-paths:
+    name: infer-changed-paths
+    runs-on: cronos
+    env:
+      LUNAR_COMPONENT_INFER: "true"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: QA marker
+        run: echo "lunar-qa::infer-changed-paths"
+
+  # Method 5: INFER via process cwd. working-directory pins the traced process
+  # to a subdir; attribution falls to cwd inference only when changed-paths is
+  # empty -- i.e. a commit that touches NO component path (probe B).
+  infer-cwd:
+    name: infer-cwd
+    runs-on: cronos
     env:
       LUNAR_COMPONENT_INFER: "true"
     defaults:
@@ -69,39 +105,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           clean: true
-      - name: Python version
-        run: python3 --version
-      - name: Install dependencies
+      - name: QA marker
+        run: echo "lunar-qa::infer-cwd"
+      - name: Compile check
         run: |
           python3 -m venv .venv
           . .venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Compile check
-        run: |
-          . .venv/bin/activate
           python -m py_compile main.py
-
-  # Comma-separated LUNAR_COMPONENT (multi-explicit): one shared job's CI is
-  # attributed to BOTH named components at once. backend-go + compliance are
-  # named here (api-python intentionally NOT, so its INFER cwd attribution
-  # stays cleanly isolated on a workflow-only diff).
-  cross-service:
-    name: cross-service
-    runs-on: cronos
-    env:
-      LUNAR_COMPONENT: "services/backend-go,compliance"
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          clean: true
-      - name: Install semgrep
-        run: |
-          python3 -m venv .venv
-          . .venv/bin/activate
-          pip install --quiet semgrep
-      - name: Semgrep scan (shared)
-        run: |
-          . .venv/bin/activate
-          semgrep scan --config auto . || true

@@ -26,6 +26,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           clean: true
+      - name: QA marker
+        # Method 3: ciPipelines. Attributed to the compliance component via the
+        # compliance-ci workflow name (see qa-attribution policy).
+        run: echo "lunar-qa::ci-pipelines"
       - name: Install semgrep
         # System Python is externally-managed (PEP 668); use a venv like the
         # api-python job does.
