@@ -11,10 +11,11 @@ on:
 
 # Monorepo attribution QA matrix. Each job exercises one CI -> component
 # attribution method in ci/observe.go:selectComponents and emits a unique
-# `lunar-qa::<method>` marker command. The lunar-ci-agent traces it, ci-meta
-# records it under the resolved component's `.ci.commands.*`, and the
-# qa-attribution policy (pantalasa-cronos/lunar) asserts each component carries
-# exactly its expected markers and none of its siblings'.
+# `/bin/echo lunar-qa::<method>` marker (a real binary the agent traces; the
+# shell-builtin echo is invisible to it). The qa-marker collector records it
+# under the resolved component's `.qa.markers.<method>`, and the qa-attribution
+# policy (pantalasa-cronos/lunar) asserts each component carries exactly its
+# expected markers and none of its siblings'.
 #
 # The five methods (ciPipelines lives in compliance.yml):
 #   1 explicit single      -> LUNAR_COMPONENT=<path>
@@ -44,7 +45,7 @@ jobs:
         with:
           clean: true
       - name: QA marker
-        run: echo "lunar-qa::explicit-single"
+        run: /bin/echo "lunar-qa::explicit-single"
       - name: Go build
         run: |
           go version
@@ -64,7 +65,7 @@ jobs:
         with:
           clean: true
       - name: QA marker
-        run: echo "lunar-qa::explicit-multi"
+        run: /bin/echo "lunar-qa::explicit-multi"
       - name: Semgrep scan (shared)
         run: |
           python3 -m venv .venv
@@ -87,7 +88,7 @@ jobs:
         with:
           clean: true
       - name: QA marker
-        run: echo "lunar-qa::infer-changed-paths"
+        run: /bin/echo "lunar-qa::infer-changed-paths"
 
   # Method 5: INFER via process cwd. working-directory pins the traced process
   # to a subdir; attribution falls to cwd inference only when changed-paths is
@@ -106,7 +107,7 @@ jobs:
         with:
           clean: true
       - name: QA marker
-        run: echo "lunar-qa::infer-cwd"
+        run: /bin/echo "lunar-qa::infer-cwd"
       - name: Compile check
         run: |
           python3 -m venv .venv

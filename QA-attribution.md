@@ -16,9 +16,11 @@ in `pantalasa-cronos/lunar`.
 | 4 | INFER changed-paths | `ci.yml` job `infer-changed-paths` (`INFER=true`, repo-root cwd) | the subdir the commit **touched** |
 | 5 | INFER cwd | `ci.yml` job `infer-cwd` (`INFER=true`, `working-directory: services/api-python`) | `services/api-python` |
 
-Each job emits a unique marker command `echo "lunar-qa::<method>"`. The `ci-meta`
-collector records every traced command under the resolved component's
-`.ci.commands.*`, so the marker lands on whichever component attribution chose.
+Each job emits a unique marker `/bin/echo "lunar-qa::<method>"` — a real binary
+the agent's tracer sees (the shell-builtin `echo` is invisible to it). The
+`qa-marker` collector (pantalasa-cronos/lunar) records the method token under the
+resolved component's `.qa.markers.<method>` (env-free), so the marker lands on
+whichever component attribution chose.
 
 ## Why two probe commits
 

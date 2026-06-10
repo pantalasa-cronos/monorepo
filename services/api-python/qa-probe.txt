@@ -1,2 +1,1 @@
-attribution QA probe A (changed-paths -> services/api-python)
-5692535
+attribution QA probe A v2 (markers via qa-marker; touches services/api-python)
