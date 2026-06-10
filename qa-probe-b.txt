@@ -1,0 +1,1 @@
+attribution QA probe B (root-only; exercises infer-cwd -> services/api-python)
