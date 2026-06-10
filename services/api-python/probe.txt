@@ -1,3 +1,4 @@
 probe A (native qa-marker, config 8c11118) 2026-06-10T03:09:51Z
 probe A re-run (test infer-changed-paths #4) 2026-06-10T03:17:54Z
 post-deploy test 1 (#4 on push, image 1180b476) 2026-06-10T16:20:56Z
+post-deploy test 3 (doneness PR, siblings settle) 2026-06-10T16:34:48Z
