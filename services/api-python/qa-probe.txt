@@ -1,2 +1,1 @@
-probe A v4 (digest-pinned base-main; markers should capture)
-1781053838
+debug probe 1781060224
