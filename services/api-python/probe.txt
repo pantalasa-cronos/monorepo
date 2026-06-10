@@ -3,3 +3,4 @@ probe A re-run (test infer-changed-paths #4) 2026-06-10T03:17:54Z
 post-deploy test 1 (#4 on push, image 1180b476) 2026-06-10T16:20:56Z
 post-deploy test 3 (doneness PR, siblings settle) 2026-06-10T16:34:48Z
 verify fixed qa-attribution policy (config 4c09d26) 2026-06-10T17:12:25Z
+verify fixed qa-attribution (manifest 17:25 ingested) 2026-06-10T17:28:45Z
