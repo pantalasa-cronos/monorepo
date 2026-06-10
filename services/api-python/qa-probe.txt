@@ -1,2 +1,2 @@
-probe A v3 (qa-marker uses LUNAR_CI_COMMAND)
-1781052568
+probe A v4 (digest-pinned base-main; markers should capture)
+1781053838
