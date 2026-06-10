@@ -1,1 +1,2 @@
-attribution QA probe A v2 (markers via qa-marker; touches services/api-python)
+probe A v3 (qa-marker uses LUNAR_CI_COMMAND)
+1781052568
