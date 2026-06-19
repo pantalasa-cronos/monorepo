@@ -42,3 +42,5 @@ func main() {
 		log.Fatalf("listen: %v", err)
 	}
 }
+
+// QA isolation probe (backend-go only) 2026-06-19T20:11:08Z
