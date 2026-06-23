@@ -16,7 +16,12 @@ go build -o backend-go
 curl http://localhost:8080/
 ```
 
-The service listens on `:8080` and exposes `/` and `/healthz`.
+The service listens on `:8080` (override with the `ADDR` env var) and exposes the following endpoints:
+
+| Method | Path       | Description                          |
+| ------ | ---------- | ------------------------------------ |
+| GET    | `/`        | Returns a JSON greeting and metadata |
+| GET    | `/healthz` | Liveness probe, returns `ok`         |
 
 ## Tier
 
