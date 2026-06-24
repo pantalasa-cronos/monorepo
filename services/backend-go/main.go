@@ -17,7 +17,7 @@ type response struct {
 	Version string `json:"version"`
 }
 
-const version = "0.1.0"
+const version = "0.1.1"
 
 func main() {
 	mux := http.NewServeMux()
