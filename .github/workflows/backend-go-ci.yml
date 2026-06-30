@@ -1,6 +1,6 @@
 name: backend-go-ci
 
-# Bryan Winstead's monorepo scenario, made literal.
+# Monorepo dependency scenario, made literal.
 #
 # backend-go (the "app") depends on lib/common (the shared "library"). This
 # workflow — backend-go's CI — is triggered when EITHER the service's own

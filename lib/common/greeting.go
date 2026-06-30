@@ -1,6 +1,6 @@
 // Package common is a shared library used by services in this monorepo.
 //
-// It models the customer scenario (Bryan Winstead): a component defined as a
+// It models a monorepo dependency scenario: a component defined as a
 // subdirectory (services/backend-go) depends on a library in a *sibling*
 // subdirectory (lib/common). When this library changes, nothing in
 // services/backend-go/ changes — yet backend-go must be rebuilt and
