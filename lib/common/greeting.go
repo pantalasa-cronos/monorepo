@@ -12,5 +12,5 @@ package common
 // shared library. Changing this string is a library-only change: it forces a
 // rebuild of backend-go without touching anything under services/backend-go/.
 func Greeting() string {
-	return "hello from lib/common v2 (library-only change)"
+	return "hello from lib/common v3 (fan-out: lib + backend-go)"
 }
