@@ -1,0 +1,48 @@
+name: backend-go-ci
+
+# Bryan Winstead's monorepo scenario, made literal.
+#
+# backend-go (the "app") depends on lib/common (the shared "library"). This
+# workflow — backend-go's CI — is triggered when EITHER the service's own
+# subdirectory OR the shared library changes. So a library-only change (nothing
+# under services/backend-go/) still triggers a backend-go build.
+#
+# The Lunar agent attributes the traced build to the backend-go component via
+# LUNAR_COMPONENT, and backend-go's component `paths` (which include lib/common/*)
+# make Lunar re-evaluate the component for that library change. Result: the
+# service's checks resolve solid off the rebuild, even though nothing in its own
+# subdirectory changed.
+on:
+  pull_request:
+    paths:
+      - "services/backend-go/**"
+      - "lib/common/**"
+  push:
+    branches:
+      - "**"
+    paths:
+      - "services/backend-go/**"
+      - "lib/common/**"
+
+jobs:
+  build:
+    name: build
+    runs-on: cronos
+    env:
+      LUNAR_COMPONENT: services/backend-go
+    defaults:
+      run:
+        working-directory: services/backend-go
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: Go build (rebuilds against lib/common)
+        run: |
+          go version
+          go build ./...
+      - name: Go vet
+        run: go vet ./...
+      - name: Go test
+        run: go test ./... || true

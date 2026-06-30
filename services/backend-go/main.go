@@ -1,14 +1,17 @@
 package main
 
-// Touches backend-go so the path-filtered code collector fires for this
-// sub-component alongside the per-service CI job (LUNAR_COMPONENT attribution test).
-// Re-run after reverting the snyk TEMP pin that wedged the cronos hub manifest.
+// backend-go depends on the shared lib/common library (a sibling subdirectory).
+// Because that dependency is declared in backend-go's component `paths`, a
+// change to lib/common re-evaluates this service in Lunar even though nothing
+// under services/backend-go/ changed.
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/pantalasa-cronos/monorepo/lib/common"
 )
 
 type response struct {
@@ -26,7 +29,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(response{
 			Service: "backend-go",
-			Message: "hello from pantalasa-cronos monorepo backend-go",
+			Message: common.Greeting(),
 			Version: version,
 		})
 	})
