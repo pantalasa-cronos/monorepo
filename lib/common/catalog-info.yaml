@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: common
+  description: Shared library (monorepo subcomponent)
+  annotations:
+    pantalasa.org/domain: engineering.platform.core
+  tags:
+    - library
+spec:
+  type: library
+  lifecycle: production
+  owner: group:default/team-platform

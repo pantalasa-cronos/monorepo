@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backend-go
+  description: Go backend service (monorepo subcomponent)
+  annotations:
+    pantalasa.org/domain: engineering.platform.core
+  tags:
+    - go
+    - service
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/team-backend
