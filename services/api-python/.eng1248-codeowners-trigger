@@ -1,1 +1,1 @@
-trigger v3 (queue clear)
+trigger v4 (v1.10.1 post-merge verify 20260722T095841Z)
