@@ -12,3 +12,10 @@ spec:
   type: service
   lifecycle: production
   owner: group:default/team-backend
+  # TEMP (ENG-1654 / lunar-lib#297): exercises the backstage collector's
+  # referential-integrity lookups against the in-cluster Backstage.
+  # `core-platform` is a real Domain in the seed catalog (expect exists: true);
+  # `typo-platform-eng1654` deliberately is not (expect exists: false).
+  # REVERT once the test is recorded.
+  domain: core-platform
+  system: typo-platform-eng1654
