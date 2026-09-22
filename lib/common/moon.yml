@@ -1,0 +1,6 @@
+id: 'common'
+layer: library
+language: go
+# greeting.go imports github.com/pantalasa-cronos/monorepo/lib/logging.
+dependsOn:
+  - logging

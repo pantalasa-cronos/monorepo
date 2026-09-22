@@ -1,0 +1,5 @@
+id: 'api-python'
+layer: application
+language: python
+# Standalone: shares no code with the Go services. Its paths should stay at
+# its own directory.

@@ -1,0 +1,8 @@
+# moon workspace for the Lunar moon-cataloger (catalogers/moon, ENG-1878).
+# Each project below declares its own dependsOn edges; the cataloger reads this
+# graph and writes every component's `paths` from it, so a commit to a shared
+# library re-evaluates the services that consume it.
+projects:
+  - 'services/*'
+  - 'lib/*'
+  - 'compliance'
