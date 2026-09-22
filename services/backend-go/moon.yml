@@ -1,0 +1,6 @@
+id: 'backend-go'
+layer: application
+language: go
+# main.go imports github.com/pantalasa-cronos/monorepo/lib/common.
+dependsOn:
+  - common
