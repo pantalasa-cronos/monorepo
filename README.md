@@ -39,3 +39,5 @@ Changes to shared compliance go through a documented review process described in
 <!-- Trigger collectors with the new lunar-config -->
 
 <!-- ENG-1878: re-triggered the moon cataloger against the final plugin revision. -->
+
+<!-- ENG-1878 retry: final plugin revision c6d2c11d. -->
