@@ -1,0 +1,31 @@
+# ENG-1871 cronos verification (temporary, branch mike/pin-verify-2 only).
+# A push runs nothing. Each re-run of the workflow issues one hub command on
+# this same commit (RunCollectors/CollectExternal are "own commit" for CI jobs),
+# picked by run_attempt.
+name: pin-verify
+on:
+  push:
+    branches: [mike/pin-verify-2]
+jobs:
+  cmd:
+    runs-on: cronos
+    steps:
+      - name: hub command for this attempt
+        env:
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -x
+          C=github.com/pantalasa-cronos/monorepo
+          PR=19
+          case "$ATTEMPT" in
+            1) echo "first run: nothing to do" ;;
+            2) lunar collector run "$C/services/backend-go" --pr "$PR" --output-json ;;
+            3) lunar collector run "$C/services/api-python" --only-cron --pr "$PR" --output-json ;;
+            4) lunar collector run --output-json ;;
+            5) lunar collect --component "$C/compliance" --sha "$SHA" .pinverify.external "attempt-$ATTEMPT" ;;
+            *) echo "no command for attempt $ATTEMPT" ;;
+          esac
+          lunar --version || true
+        shell: bash
+        continue-on-error: false
