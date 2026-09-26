@@ -17,7 +17,7 @@ jobs:
         run: |
           set -x
           C=github.com/pantalasa-cronos/monorepo
-          PR=$(gh pr list --repo pantalasa-cronos/monorepo --head mike/pin-verify-2 --json number -q '.[0].number' 2>/dev/null || true)
+          PR=19
           case "$ATTEMPT" in
             1) echo "first run: nothing to do" ;;
             2) lunar collector run "$C/services/backend-go" --git-sha "$SHA" ${PR:+--pr "$PR"} --output-json ;;
