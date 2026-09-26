@@ -1,0 +1,11 @@
+# ENG-1944 test (temporary): first run of a workflow_run chain, deploy -> promote -> smoke.
+name: chain deploy
+on:
+  push:
+    branches: [main]
+    paths: [".github/chain-trigger"]
+jobs:
+  deploy:
+    runs-on: cronos
+    steps:
+      - run: echo "deploying ${GITHUB_SHA}"; sleep 60

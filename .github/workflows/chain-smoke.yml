@@ -1,0 +1,13 @@
+# ENG-1944 test (temporary): started by "chain promote" on a GitHub-hosted runner with no
+# tracer, so the Hub reads the link from the run title.
+name: chain smoke
+run-name: "${{ github.workflow }} (from run ${{ github.event.workflow_run.id }})"
+on:
+  workflow_run:
+    workflows: ["chain promote"]
+    types: [completed]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "smoke testing (GitHub stamped this run ${GITHUB_SHA})"
