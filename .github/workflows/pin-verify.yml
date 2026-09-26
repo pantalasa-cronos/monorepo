@@ -20,8 +20,8 @@ jobs:
           PR=19
           case "$ATTEMPT" in
             1) echo "first run: nothing to do" ;;
-            2) lunar collector run "$C/services/backend-go" --git-sha "$SHA" ${PR:+--pr "$PR"} --output-json ;;
-            3) lunar collector run "$C/services/api-python" --only-cron --git-sha "$SHA" ${PR:+--pr "$PR"} --output-json ;;
+            2) lunar collector run "$C/services/backend-go" --pr "$PR" --output-json ;;
+            3) lunar collector run "$C/services/api-python" --only-cron --pr "$PR" --output-json ;;
             4) lunar collector run --output-json ;;
             5) lunar collect --component "$C/compliance" --sha "$SHA" .pinverify.external "attempt-$ATTEMPT" ;;
             *) echo "no command for attempt $ATTEMPT" ;;
