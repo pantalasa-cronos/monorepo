@@ -32,3 +32,4 @@ Tier 1, PII-adjacent. See `compliance/data-classification.md`.
 Changes follow the repo-level CODEOWNERS and the review process described in `../../compliance/policies/`.
 
 Chained-run test A: 2026-09-26T21:29:38Z
+Chained-run test B: 2026-09-26T21:30:09Z
