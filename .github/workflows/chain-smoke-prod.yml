@@ -1,0 +1,43 @@
+name: "chain: smoke test prod"
+
+on:
+  workflow_run:
+    workflows: ["chain: verify preprod and promote to prod"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    if: >-
+      github.event.workflow_run.path == '.github/workflows/chain-promote-prod.yml' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: cronos
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha: ${{ steps.handover.outputs.sha }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: prod-metadata
+          path: handover
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - id: handover
+        run: |
+          sha=$(sed -n 's/.*"sha": *"\([0-9a-f]*\)".*/\1/p' handover/metadata.json)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "hand-over sha:         $sha"
+          echo "workflow_run.head_sha: ${{ github.event.workflow_run.head_sha }}"
+          echo "this run's GITHUB_SHA: $GITHUB_SHA"
+
+  smoke-prod:
+    needs: [discover]
+    uses: ./.github/workflows/chain-smoke-test.yml
+    with:
+      environment: prod
+      sha: ${{ needs.discover.outputs.sha }}

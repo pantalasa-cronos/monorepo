@@ -1,0 +1,35 @@
+# Temporary test pipeline for chained CI runs: deploy dev, then three
+# workflow_run hops (promote preprod, promote prod, smoke prod), all on cronos
+# runners. Each hop hands the deployed commit to the next through an artifact.
+name: "chain: deploy dev"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: cronos
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        run: echo "version=0.0.0-${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: [version]
+    runs-on: cronos
+    steps:
+      - run: echo "deploying ${GITHUB_SHA} as ${{ needs.version.outputs.version }}"; sleep 60
+      - name: Write the hand-over
+        run: |
+          mkdir -p handover
+          printf '{"sha": "%s", "version": "%s"}\n' "$GITHUB_SHA" "${{ needs.version.outputs.version }}" > handover/metadata.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deploy-metadata
+          path: handover/metadata.json

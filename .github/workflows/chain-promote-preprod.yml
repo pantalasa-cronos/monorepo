@@ -1,0 +1,62 @@
+name: "chain: verify dev and promote to preprod"
+
+on:
+  workflow_run:
+    workflows: ["chain: deploy dev"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chain-promote-preprod
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  discover:
+    if: >-
+      github.event.workflow_run.path == '.github/workflows/chain-deploy-dev.yml' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: cronos
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha: ${{ steps.handover.outputs.sha }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deploy-metadata
+          path: handover
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - id: handover
+        run: |
+          sha=$(sed -n 's/.*"sha": *"\([0-9a-f]*\)".*/\1/p' handover/metadata.json)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "hand-over sha:         $sha"
+          echo "workflow_run.head_sha: ${{ github.event.workflow_run.head_sha }}"
+          echo "this run's GITHUB_SHA: $GITHUB_SHA"
+
+  smoke-dev:
+    needs: [discover]
+    uses: ./.github/workflows/chain-smoke-test.yml
+    with:
+      environment: dev
+      sha: ${{ needs.discover.outputs.sha }}
+
+  promote:
+    needs: [discover, smoke-dev]
+    runs-on: cronos
+    steps:
+      - run: echo "promoting to preprod ${{ needs.discover.outputs.sha }}"; sleep 30
+      - name: Hand the commit over
+        run: |
+          mkdir -p handover
+          printf '{"sha": "%s"}\n' "${{ needs.discover.outputs.sha }}" > handover/metadata.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preprod-metadata
+          path: handover/metadata.json

@@ -1,0 +1,72 @@
+name: "chain: verify preprod and promote to prod"
+
+on:
+  workflow_run:
+    workflows: ["chain: verify dev and promote to preprod"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chain-promote-prod
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  discover:
+    if: >-
+      github.event.workflow_run.path == '.github/workflows/chain-promote-preprod.yml' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: cronos
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha: ${{ steps.handover.outputs.sha }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: preprod-metadata
+          path: handover
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - id: handover
+        run: |
+          sha=$(sed -n 's/.*"sha": *"\([0-9a-f]*\)".*/\1/p' handover/metadata.json)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "hand-over sha:         $sha"
+          echo "workflow_run.head_sha: ${{ github.event.workflow_run.head_sha }}"
+          echo "this run's GITHUB_SHA: $GITHUB_SHA"
+
+  smoke-preprod:
+    needs: [discover]
+    uses: ./.github/workflows/chain-smoke-test.yml
+    with:
+      environment: preprod
+      sha: ${{ needs.discover.outputs.sha }}
+
+  release-gate:
+    needs: [discover, smoke-preprod]
+    runs-on: cronos
+    steps:
+      # A gate keyed on workflow_run.head_sha checks this hop's upstream stamp,
+      # which is the deployed commit only if main didn't move during the chain.
+      - run: |
+          echo "a gate on workflow_run.head_sha would check: ${{ github.event.workflow_run.head_sha }}"
+          echo "the commit actually being promoted:          ${{ needs.discover.outputs.sha }}"
+
+  promote:
+    needs: [discover, release-gate]
+    runs-on: cronos
+    steps:
+      - run: echo "promoting to prod ${{ needs.discover.outputs.sha }}"; sleep 30
+      - name: Hand the commit over
+        run: |
+          mkdir -p handover
+          printf '{"sha": "%s"}\n' "${{ needs.discover.outputs.sha }}" > handover/metadata.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prod-metadata
+          path: handover/metadata.json
