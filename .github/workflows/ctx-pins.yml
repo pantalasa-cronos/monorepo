@@ -1,0 +1,35 @@
+# ENG-1994 cronos verification (temporary, branches mike/ctx-pins-1/-2 only).
+# Push runs: attempt 1 does nothing; each re-run issues one hub command on this
+# commit (CI jobs may only act on their own commit). PR runs just give the CI
+# agent a pull-request job to resolve its pin for.
+name: ctx-pins
+on:
+  push:
+    branches: [mike/ctx-pins-1, mike/ctx-pins-2]
+  pull_request:
+    branches: [main]
+jobs:
+  cmd:
+    runs-on: cronos
+    steps:
+      - name: hub command for this attempt
+        if: github.event_name == 'push'
+        env:
+          SHA: ${{ github.sha }}
+          ATTEMPT: ${{ github.run_attempt }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          C=github.com/pantalasa-cronos/monorepo
+          PR1=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head mike/ctx-pins-1 --json number -q '.[0].number')
+          case "$ATTEMPT" in
+            1) echo "first run: nothing to do" ;;
+            2) lunar collector run "$C/services/backend-go" --only-code --pr "$PR1" --output-json ;;
+            3) lunar collector run "$C/services/backend-go" --only-code --git-sha "$SHA" --output-json ;;
+            *) echo "no command for attempt $ATTEMPT" ;;
+          esac
+          lunar --version || true
+        shell: bash
+      - name: pull request job
+        if: github.event_name == 'pull_request'
+        run: echo "PR ${{ github.event.pull_request.number }} head ${{ github.event.pull_request.head.sha }}"
