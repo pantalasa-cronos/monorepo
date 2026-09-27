@@ -39,3 +39,4 @@ Main-control test C: 2026-09-27T00:22:36Z
 Chained-run test A3: 2026-09-27T12:44:24Z
 Chained-run test B3: 2026-09-27T12:44:24Z
 Chained-run test A4: 2026-09-27T16:44:37Z
+Chained-run test B4: 2026-09-27T16:44:37Z
