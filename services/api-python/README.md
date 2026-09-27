@@ -25,3 +25,4 @@ Tier 2, internal. See `compliance/data-classification.md`.
 ## Contributing
 
 Changes follow the repo-level CODEOWNERS and the review process described in `../../compliance/policies/`.
+Non-affected-component test D: 2026-09-27T13:10:50Z
